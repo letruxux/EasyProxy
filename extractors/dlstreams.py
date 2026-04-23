@@ -95,20 +95,24 @@ class DLStreamsExtractor:
             if self._browser:
                 return self._browser
             
-            import os
+            import os, sys
             chrome_path = os.getenv("CHROME_BIN") or os.getenv("CHROME_EXE_PATH")
             logger.debug(f"DLStreams initialization - CHROME_BIN: {os.getenv('CHROME_BIN')}, CHROME_EXE_PATH: {os.getenv('CHROME_EXE_PATH')}")
             
+            # Use headless on Linux/Termux/Docker, headful on Windows for testing
+            is_linux = sys.platform.startswith("linux")
+            is_headless = is_linux
+            
             if chrome_path and os.path.exists(chrome_path):
-                logger.info(f"DLStreams using browser path: {chrome_path}")
+                logger.info(f"DLStreams using browser path: {chrome_path} (Headless: {is_headless})")
                 executable_path = chrome_path
             else:
-                logger.warning(f"DLStreams could not find system Chromium at {chrome_path}, falling back to default")
+                logger.warning(f"DLStreams could not find system Chromium at {chrome_path}, falling back to default (Headless: {is_headless})")
                 executable_path = None
 
             self._playwright = await async_playwright().start()
             self._browser = await self._playwright.chromium.launch(
-                headless=False,
+                headless=is_headless,
                 executable_path=executable_path,
                 args=[
                     "--disable-blink-features=AutomationControlled",
