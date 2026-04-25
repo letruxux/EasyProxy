@@ -145,6 +145,7 @@ class FreeshotExtractor:
         
         # Token extraction (no need for try-except wrapper since ExtractorError propagates)
         # Nuova estrazione token via currentToken
+        body["html"] if isinstance(body, dict) and body.get("html") else body
         match = re.search(r'streamUrl\s*:\s*"([^"]+)"', body)
         if not match:
             # Fallback al vecchio metodo iframe
